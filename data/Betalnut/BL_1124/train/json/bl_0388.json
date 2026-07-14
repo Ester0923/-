@@ -1,0 +1,127 @@
+{
+  "version": "3.2.6",
+  "flags": {},
+  "shapes": [
+    {
+      "kie_linking": [],
+      "label": "BL",
+      "score": 0.9505985379219055,
+      "points": [
+        [
+          716.59248046875,
+          237.8962890625
+        ],
+        [
+          881.753515625,
+          237.8962890625
+        ],
+        [
+          881.753515625,
+          373.1259765625
+        ],
+        [
+          716.59248046875,
+          373.1259765625
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "BL",
+      "score": 0.9459850788116455,
+      "points": [
+        [
+          387.66455078125,
+          1.026416015625
+        ],
+        [
+          569.760546875,
+          1.026416015625
+        ],
+        [
+          569.760546875,
+          105.4189453125
+        ],
+        [
+          387.66455078125,
+          105.4189453125
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "BL",
+      "score": 0.9432123899459839,
+      "points": [
+        [
+          268.710498046875,
+          326.8107421875
+        ],
+        [
+          407.0775390625,
+          326.8107421875
+        ],
+        [
+          407.0775390625,
+          442.7486328125
+        ],
+        [
+          268.710498046875,
+          442.7486328125
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "BL",
+      "score": 0.9346076250076294,
+      "points": [
+        [
+          184.282080078125,
+          231.5486328125
+        ],
+        [
+          260.991015625,
+          231.5486328125
+        ],
+        [
+          260.991015625,
+          429.7916015625
+        ],
+        [
+          184.282080078125,
+          429.7916015625
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    }
+  ],
+  "imagePath": "bl_0388.jpg",
+  "imageData": null,
+  "imageHeight": 500,
+  "imageWidth": 2048,
+  "description": ""
+}

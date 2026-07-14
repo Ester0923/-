@@ -1078,6 +1078,9 @@ class RTDETRDecoder(nn.Module):
             shapes (list): List of feature map shapes.
         """
         # Get projection features
+        #print(f"Head 输入 x 的类型：{type(x)}，长度：{len(x)}")
+        #for i, feat in enumerate(x):
+            #print(f"x[{i}] 类型：{type(feat)}，形状：{feat.shape if feat is not None else 'None'}")
         x = [self.input_proj[i](feat) for i, feat in enumerate(x)]
         # Get encoder inputs
         feats = []

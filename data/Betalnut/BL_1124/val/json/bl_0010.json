@@ -1,0 +1,37 @@
+{
+  "version": "3.3.0",
+  "flags": {},
+  "shapes": [
+    {
+      "label": "BL",
+      "shape_type": "rectangle",
+      "flags": {},
+      "points": [
+        [
+          998.811648,
+          117.21175000000001
+        ],
+        [
+          1100.773376,
+          117.21175000000001
+        ],
+        [
+          1100.773376,
+          364.90725000000003
+        ],
+        [
+          998.811648,
+          364.90725000000003
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "attributes": {}
+    }
+  ],
+  "imagePath": "bl_0010.jpg",
+  "imageData": null,
+  "imageHeight": 500,
+  "imageWidth": 2048
+}

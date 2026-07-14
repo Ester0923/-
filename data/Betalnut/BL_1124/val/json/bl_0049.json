@@ -1,0 +1,118 @@
+{
+  "version": "3.3.0",
+  "flags": {},
+  "shapes": [
+    {
+      "label": "BL",
+      "shape_type": "rectangle",
+      "flags": {},
+      "points": [
+        [
+          908.147712,
+          252.11225
+        ],
+        [
+          1053.094912,
+          252.11225
+        ],
+        [
+          1053.094912,
+          376.00275
+        ],
+        [
+          908.147712,
+          376.00275
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "attributes": {}
+    },
+    {
+      "label": "Others",
+      "shape_type": "rectangle",
+      "flags": {},
+      "points": [
+        [
+          1146.415104,
+          22.85874999999999
+        ],
+        [
+          1220.634624,
+          22.85874999999999
+        ],
+        [
+          1220.634624,
+          120.69525
+        ],
+        [
+          1146.415104,
+          120.69525
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "attributes": {}
+    },
+    {
+      "label": "BL",
+      "shape_type": "rectangle",
+      "flags": {},
+      "points": [
+        [
+          1483.68896,
+          254.68449999999999
+        ],
+        [
+          1565.2587520000002,
+          254.68449999999999
+        ],
+        [
+          1565.2587520000002,
+          481.0635
+        ],
+        [
+          1483.68896,
+          481.0635
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "attributes": {}
+    },
+    {
+      "label": "BL",
+      "shape_type": "rectangle",
+      "flags": {},
+      "points": [
+        [
+          1178.167296,
+          361.779
+        ],
+        [
+          1338.333184,
+          361.779
+        ],
+        [
+          1338.333184,
+          447.204
+        ],
+        [
+          1178.167296,
+          447.204
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "attributes": {}
+    }
+  ],
+  "imagePath": "bl_0049.jpg",
+  "imageData": null,
+  "imageHeight": 500,
+  "imageWidth": 2048
+}

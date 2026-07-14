@@ -1,0 +1,53 @@
+{
+  "labels": [
+    "spot",
+    "damage"
+  ],
+  "group_seconds": 2.0,
+  "phash_distance": -1,
+  "annotated_images": 903,
+  "empty_normal_images": 296,
+  "unlabeled_images": 0,
+  "skipped": 0,
+  "splits": {
+    "train": {
+      "images": 633,
+      "boxes": 499,
+      "empty_normal_images": 208,
+      "images_per_label": {
+        "spot": 337,
+        "damage": 100
+      },
+      "boxes_per_label": {
+        "spot": 399,
+        "damage": 100
+      }
+    },
+    "val": {
+      "images": 135,
+      "boxes": 107,
+      "empty_normal_images": 44,
+      "images_per_label": {
+        "damage": 14,
+        "spot": 85
+      },
+      "boxes_per_label": {
+        "damage": 21,
+        "spot": 86
+      }
+    },
+    "test": {
+      "images": 135,
+      "boxes": 106,
+      "empty_normal_images": 44,
+      "images_per_label": {
+        "spot": 70,
+        "damage": 21
+      },
+      "boxes_per_label": {
+        "spot": 85,
+        "damage": 21
+      }
+    }
+  }
+}

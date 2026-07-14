@@ -1,0 +1,42 @@
+path: /mnt/bigdisk/ultralytics/data/areca_surface_defects_2class_normal  # 数据集所在路径
+train: train.txt  # 数据集路径下的train.txt
+val: val.txt  # 数据集路径下的val.txt
+test: test.txt  # 数据集路径下的test.txt
+
+# Classes
+nc: 2
+names:
+  #0: Mc
+  #1: Dd
+  #2: Pi
+  #3: Po
+  
+#names:
+  #0: Cr
+  #1: In
+  #2: Pa
+  #3: PS
+  #4: RS
+  #5: Sc
+  
+#names:
+  #0: Pu
+  #1: Wl
+  #2: Cg
+  #3: Ws
+  #4: Os
+  #5: Ss
+  #6: In
+  #7: Rp
+  #8: Cr
+  #9: Wf
+
+#names: 
+  #0: class-1
+  #1: class-2
+  #2: class-3
+  #3: class-4
+
+names:
+  0: Spot
+  1: Demage 

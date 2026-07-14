@@ -1,0 +1,127 @@
+{
+  "version": "3.3.0",
+  "flags": {},
+  "shapes": [
+    {
+      "kie_linking": [],
+      "label": "BL",
+      "score": 0.9533592462539673,
+      "points": [
+        [
+          1588.36240234375,
+          79.28203125
+        ],
+        [
+          1747.29140625,
+          79.28203125
+        ],
+        [
+          1747.29140625,
+          189.3015625
+        ],
+        [
+          1588.36240234375,
+          189.3015625
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "Others",
+      "score": 0.9390959739685059,
+      "points": [
+        [
+          1037.9779296875,
+          3.9494140625
+        ],
+        [
+          1103.0619140625,
+          3.9494140625
+        ],
+        [
+          1103.0619140625,
+          69.33388671875
+        ],
+        [
+          1037.9779296875,
+          69.33388671875
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "Others",
+      "score": 0.8742471933364868,
+      "points": [
+        [
+          869.16796875,
+          445.78935546875
+        ],
+        [
+          942.4859375,
+          445.78935546875
+        ],
+        [
+          942.4859375,
+          496.79990234375
+        ],
+        [
+          869.16796875,
+          496.79990234375
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "Others",
+      "score": 0.7973666191101074,
+      "points": [
+        [
+          555.0150390625,
+          0.62451171875
+        ],
+        [
+          621.8271484375,
+          0.62451171875
+        ],
+        [
+          621.8271484375,
+          44.00322265625
+        ],
+        [
+          555.0150390625,
+          44.00322265625
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    }
+  ],
+  "imagePath": "bl_0221.jpg",
+  "imageData": null,
+  "imageHeight": 500,
+  "imageWidth": 2048,
+  "description": ""
+}

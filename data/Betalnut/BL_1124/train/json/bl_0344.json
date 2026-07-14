@@ -1,0 +1,214 @@
+{
+  "version": "3.3.0",
+  "flags": {},
+  "shapes": [
+    {
+      "label": "BL",
+      "score": 0.9551253318786621,
+      "points": [
+        [
+          1175.5125,
+          108.1859375
+        ],
+        [
+          1309.3515625,
+          108.1859375
+        ],
+        [
+          1309.3515625,
+          289.58359375
+        ],
+        [
+          1175.5125,
+          289.58359375
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {},
+      "kie_linking": []
+    },
+    {
+      "label": "Others",
+      "score": 0.951885461807251,
+      "points": [
+        [
+          103.695263671875,
+          353.0759765625
+        ],
+        [
+          167.7099609375,
+          353.0759765625
+        ],
+        [
+          167.7099609375,
+          445.1333984375
+        ],
+        [
+          103.695263671875,
+          445.1333984375
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {},
+      "kie_linking": []
+    },
+    {
+      "label": "BL",
+      "score": 0.9473578929901123,
+      "points": [
+        [
+          287.8949951171875,
+          377.1591796875
+        ],
+        [
+          371.4147216796875,
+          377.1591796875
+        ],
+        [
+          371.4147216796875,
+          496.020703125
+        ],
+        [
+          287.8949951171875,
+          496.020703125
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {},
+      "kie_linking": []
+    },
+    {
+      "label": "Others",
+      "score": 0.942531406879425,
+      "points": [
+        [
+          688.240283203125,
+          353.44609375
+        ],
+        [
+          750.607470703125,
+          353.44609375
+        ],
+        [
+          750.607470703125,
+          441.080859375
+        ],
+        [
+          688.240283203125,
+          441.080859375
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {},
+      "kie_linking": []
+    },
+    {
+      "label": "BL",
+      "score": 0.9380593299865723,
+      "points": [
+        [
+          989.633984375,
+          221.8548828125
+        ],
+        [
+          1144.95859375,
+          221.8548828125
+        ],
+        [
+          1144.95859375,
+          300.3408203125
+        ],
+        [
+          989.633984375,
+          300.3408203125
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {},
+      "kie_linking": []
+    },
+    {
+      "label": "BL",
+      "score": 0.9354788064956665,
+      "points": [
+        [
+          665.36513671875,
+          54.49306640625
+        ],
+        [
+          781.62314453125,
+          54.49306640625
+        ],
+        [
+          781.62314453125,
+          187.77177734375
+        ],
+        [
+          665.36513671875,
+          187.77177734375
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {},
+      "kie_linking": []
+    },
+    {
+      "label": "Others",
+      "score": 0.9267129898071289,
+      "points": [
+        [
+          789.769140625,
+          69.4224609375
+        ],
+        [
+          850.6609375,
+          69.4224609375
+        ],
+        [
+          850.6609375,
+          145.2625
+        ],
+        [
+          789.769140625,
+          145.2625
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {},
+      "kie_linking": []
+    }
+  ],
+  "imagePath": "bl_0344.jpg",
+  "imageData": null,
+  "imageHeight": 500,
+  "imageWidth": 2048,
+  "description": ""
+}

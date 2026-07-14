@@ -1,0 +1,72 @@
+# Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
+
+# Ultralytics RT-DETR-l hybrid object detection model with P3/8 - P5/32 outputs
+# Model docs: https://docs.ultralytics.com/models/rtdetr
+# Task docs: https://docs.ultralytics.com/tasks/detect
+
+# Parameters
+nc: 6 # number of classes
+scales: # model compound scaling constants, i.e. 'model=yolov8n-cls.yaml' will call yolov8-cls.yaml with scale 'n'
+  # [depth, width, max_channels]
+  l: [0.33, 0.25, 1024]
+
+  n: [0.33, 0.25, 1024]
+#class_weights: torch.tensor([0.8, 1.0, 1.5, 4.0]
+#class_weights: [4.5, 3.7, 2.5, 2.6, 1.8, 1.2]
+#class_weights: [1.0, 1.1, 1.0, 1.0, 1.0, 1.2, 1.4, 1.6, 3.0, 1.4]
+
+custom:
+  modules:
+    DefectAFP_Lite: ultralytics.nn.modules.defect_afp.DyReconstructNet
+    
+# Ultralytics 🚀 AGPL-3.0 License
+# RT-DETR-Slim (HGNetv2 Architecture)
+# 结构完全保留，但通道数大幅削减以适配 NEU-DET
+
+nc: 6
+# 显式关闭自动缩放，完全按照下面定义的参数构建
+scales:
+  n: [1.00, 1.00, 1024]
+
+backbone:
+  # [from, repeats, module, args]
+  # args 格式: [out_channels, mid_channels, ...] 
+  # 原版 L: [48, 128] -> Slim版: [24, 32]
+  - [-1, 1, HGStem, [32, 32]] # 0-P2/4
+  
+  # Stage 1
+  # 原版 L: [48, 128, 3] -> Slim版: [32, 64, 3]
+  - [-1, 1, HGBlock, [32, 64, 3]] # 1 
+  
+  # Stage 2 (P3 产出)
+  # Downsample: 原版 128 -> Slim 64
+  - [-1, 1, DWConv, [64, 3, 2, 1, False]] # 2
+  # Block: 原版 [96, 512] -> Slim [48, 128] (关键！P3输出从512降为128)
+  - [-1, 2, HGBlock, [48, 128, 3]] # 3-P3/8
+  
+  # Stage 3 (P4 产出)
+  # Downsample: 原版 512 -> Slim 128
+  - [-1, 1, DWConv, [128, 3, 2, 1, False]] # 4
+  # Block: 原版 [192, 1024] -> Slim [96, 256] (关键！P4输出从1024降为256)
+  - [-1, 2, HGBlock, [96, 256, 5, True, False]] 
+  - [-1, 2, HGBlock, [96, 256, 5, True, True]]
+  - [-1, 2, HGBlock, [96, 256, 5, True, True]] # 7-P4/16
+
+  # Stage 4 (P5 产出)
+  # Downsample: 原版 1024 -> Slim 256
+  - [-1, 1, DWConv, [256, 3, 2, 1, False]] # 8
+  # Block: 原版 [384, 2048] -> Slim [192, 512] (关键！P5输出从2048降为512)
+  - [-1, 2, HGBlock, [192, 512, 5, True, False]] # 9-P5/32
+
+head:
+  # =========================================================
+  # 你的创新模块 (接口不变，通道数自动适配)
+  # =========================================================
+  # 输入来自 [3, 7, 9] (对应上面的层索引)
+  # 输入通道会自动被解析为 [128, 256, 512]
+  # 输出通道设为 256 (RT-DETR Decoder 的标准输入)
+  
+  - [[3, 7, 9], 1, DyReconstructNet, [256]] 
+
+  # RT-DETR Decoder
+  - [[10], 1, RTDETRDecoder, [nc, 256, 300, 4, 8, 3]]

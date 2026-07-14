@@ -1,0 +1,24 @@
+{
+  "dataset_root": "E:\\DEIM_260323\\research\\areca_project\\data\\detection\\areca_surface_defects_2class_normal",
+  "names": [
+    "spot",
+    "damage"
+  ],
+  "splits": {
+    "train": {
+      "images": 633,
+      "boxes": 499,
+      "empty_normal_images": 208
+    },
+    "val": {
+      "images": 135,
+      "boxes": 107,
+      "empty_normal_images": 44
+    },
+    "test": {
+      "images": 135,
+      "boxes": 106,
+      "empty_normal_images": 44
+    }
+  }
+}

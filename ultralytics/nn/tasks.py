@@ -10,6 +10,7 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 
+from ultralytics.nn.modules.defect_afp import DefectAFP_Lite
 from ultralytics.nn.autobackend import check_class_names
 from ultralytics.nn.modules import (
     AIFI,
@@ -769,6 +770,8 @@ class RTDETRDetectionModel(DetectionModel):
         bs = img.shape[0]
         batch_idx = batch["batch_idx"]
         gt_groups = [(batch_idx == i).sum().item() for i in range(bs)]
+        
+        # 构造 targets 字典，包含 GT 信息
         targets = {
             "cls": batch["cls"].to(img.device, dtype=torch.long).view(-1),
             "bboxes": batch["bboxes"].to(device=img.device),
@@ -778,7 +781,21 @@ class RTDETRDetectionModel(DetectionModel):
 
         if preds is None:
             preds = self.predict(img, batch=targets)
+            
+        # ==========================================
+        # 🔥🔥🔥 修复点 1：智能解包 residuals 🔥🔥🔥
+        # ==========================================
+        residuals = None
+        # 如果 preds 是长度为2的元组，且第二个元素是列表（residuals），则拆包
+        if isinstance(preds, tuple) and len(preds) == 2:
+            # 这是一个双重保险，防止误判
+            if isinstance(preds[1], list):
+                preds, residuals = preds
+        # ==========================================
+
+        # 原生解包逻辑（此时 preds 已经是正确的 5 元组了）
         dec_bboxes, dec_scores, enc_bboxes, enc_scores, dn_meta = preds if self.training else preds[1]
+        
         if dn_meta is None:
             dn_bboxes, dn_scores = None, None
         else:
@@ -791,46 +808,90 @@ class RTDETRDetectionModel(DetectionModel):
         loss = self.criterion(
             (dec_bboxes, dec_scores), targets, dn_bboxes=dn_bboxes, dn_scores=dn_scores, dn_meta=dn_meta
         )
-        # NOTE: There are like 12 losses in RTDETR, backward with all losses but only show the main three losses.
+
+        loss['loss_recon'] = torch.tensor(0.0, device=img.device)
+
         return sum(loss.values()), torch.as_tensor(
-            [loss[k].detach() for k in ["loss_giou", "loss_class", "loss_bbox"]], device=img.device
+            [loss[k].detach() for k in ["loss_giou", "loss_class", "loss_bbox", "loss_recon"]], 
+            device=img.device
         )
 
     def predict(self, x, profile=False, visualize=False, batch=None, augment=False, embed=None):
-        """
-        Perform a forward pass through the model.
+        import torch.nn.functional as F
 
-        Args:
-            x (torch.Tensor): The input tensor.
-            profile (bool): If True, profile the computation time for each layer.
-            visualize (bool): If True, save feature maps for visualization.
-            batch (dict, optional): Ground truth data for evaluation.
-            augment (bool): If True, perform data augmentation during inference.
-            embed (list, optional): A list of feature vectors/embeddings to return.
+        # 初始化残差容器
+        residuals = None
 
-        Returns:
-            (torch.Tensor): Model's output tensor.
-        """
-        y, dt, embeddings = [], [], []  # outputs
+        n_layers = len(self.model) - 1
+        y = [None] * n_layers
+        dt, embeddings = [], []
         embed = frozenset(embed) if embed is not None else {-1}
         max_idx = max(embed)
-        for m in self.model[:-1]:  # except the head part
-            if m.f != -1:  # if not from previous layer
-                x = y[m.f] if isinstance(m.f, int) else [x if j == -1 else y[j] for j in m.f]  # from earlier layers
+
+        # 遍历除了 Head 之外的所有层 (Backbone + Neck)
+        for m in self.model[:-1]:
+            if m.f != -1:
+                if isinstance(m.f, int):
+                    inp = y[m.f]
+                else:
+                    inp = [x if j == -1 else y[j] for j in m.f]
+            else:
+                inp = x
+
             if profile:
-                self._profile_one_layer(m, x, dt)
-            x = m(x)  # run
-            y.append(x if m.i in self.save else None)  # save output
+                self._profile_one_layer(m, inp, dt)
+
+            out = m(inp)
+
+            # ==========================================
+            # 🔥🔥🔥 核心修改：拦截 DefectAFP_Lite 🔥🔥🔥
+            # ==========================================
+            # 检查当前层是不是我们的新模块
+            if m.__class__.__name__ == 'DefectAFP_Lite':
+                # 如果是训练模式且返回了 tuple (outputs, residuals)
+                if self.training and isinstance(out, tuple):
+                    out, residuals = out  # 解包：out 变回特征列表 [P3, P4, P5]，residuals 被保存
+                # 如果是推理模式，out 已经是 list 了，不需要动
+            # ==========================================
+
+            if m.i < len(y):
+                y[m.i] = out if (m.i in self.save) else None
+            else:
+                extend_len = m.i - len(y) + 1
+                y.extend([None] * extend_len)
+                y[m.i] = out if (m.i in self.save) else None
+
             if visualize:
-                feature_visualization(x, m.type, m.i, save_dir=visualize)
+                feature_visualization(out, m.type, m.i, save_dir=visualize)
+
             if m.i in embed:
-                embeddings.append(torch.nn.functional.adaptive_avg_pool2d(x, (1, 1)).squeeze(-1).squeeze(-1))  # flatten
+                x_embed = out[0] if isinstance(out, (list, tuple)) else out
+                embeddings.append(F.adaptive_avg_pool2d(x_embed, (1, 1)).squeeze(-1).squeeze(-1))
                 if m.i == max_idx:
                     return torch.unbind(torch.cat(embeddings, 1), dim=0)
-        head = self.model[-1]
-        x = head([y[j] for j in head.f], batch)  # head inference
-        return x
 
+            # ==========================================
+            # 🔥🔥🔥 核心修改：防止 List 被破坏 🔥🔥🔥
+            # ==========================================
+            # 原生逻辑会把 list 取 [0]，但这会破坏 RT-DETR 多尺度特征的传递
+            # 我们强制：如果是 list (如 DefectAFP_Lite 的输出)，就保留 list
+            if isinstance(out, list):
+                x = out
+            else:
+                x = out if not isinstance(out, (list, tuple)) else out[0]
+
+        # Head 执行 (x 此时应该是 [P3, P4, P5] 的列表)
+        head = self.model[-1]
+        x = head(x, batch)
+
+        # ==========================================
+        # 🔥🔥🔥 核心修改：返回残差 🔥🔥🔥
+        # ==========================================
+        if self.training and residuals is not None:
+            return x, residuals
+            
+        return x
+    
 
 class WorldModel(DetectionModel):
     """
@@ -1615,91 +1676,157 @@ def parse_model(d, ch, verbose=True):
             A2C2f,
         }
     )
-    for i, (f, n, m, args) in enumerate(d["backbone"] + d["head"]):  # from, number, module, args
-        m = (
-            getattr(torch.nn, m[3:])
-            if "nn." in m
-            else getattr(__import__("torchvision").ops, m[16:])
-            if "torchvision.ops." in m
-            else globals()[m]
-        )  # get module
+    for i, (f, n, m, args) in enumerate(d["backbone"] + d["head"]):
+        m = (getattr(torch.nn, m[3:]) if "nn." in m
+             else getattr(__import__("torchvision").ops, m[16:]) if "torchvision.ops." in m
+             else globals()[m])
+        
         for j, a in enumerate(args):
             if isinstance(a, str):
                 with contextlib.suppress(ValueError):
                     args[j] = locals()[a] if a in locals() else ast.literal_eval(a)
-        n = n_ = max(round(n * depth), 1) if n > 1 else n  # depth gain
+        
+        n = n_ = max(round(n * depth), 1) if n > 1 else n
+
+        # ----------------------------------------------------
+        # 参数构建逻辑
+        # ----------------------------------------------------
         if m in base_modules:
             c1, c2 = ch[f], args[0]
-            if c2 != nc:  # if c2 not equal to number of classes (i.e. for Classify() output)
+            if c2 != nc:
                 c2 = make_divisible(min(c2, max_channels) * width, 8)
-            if m is C2fAttn:  # set 1) embed channels and 2) num heads
+            if m is C2fAttn:
                 args[1] = make_divisible(min(args[1], max_channels // 2) * width, 8)
                 args[2] = int(max(round(min(args[2], max_channels // 2 // 32)) * width, 1) if args[2] > 1 else args[2])
-
             args = [c1, c2, *args[1:]]
             if m in repeat_modules:
-                args.insert(2, n)  # number of repeats
+                args.insert(2, n)
                 n = 1
-            if m is C3k2:  # for M/L/X sizes
-                legacy = False
-                if scale in "mlx":
-                    args[3] = True
+            if m is C3k2:
+                if scale in "mlx": args[3] = True
             if m is A2C2f:
-                legacy = False
-                if scale in "lx":  # for L/X sizes
-                    args.extend((True, 1.2))
+                if scale in "lx": args.extend((True, 1.2))
             if m is C2fCIB:
                 legacy = False
+        
         elif m is AIFI:
             args = [ch[f], *args]
+        
         elif m in frozenset({HGStem, HGBlock}):
-            c1, cm, c2 = ch[f], args[0], args[1]
-            args = [c1, cm, c2, *args[2:]]
-            if m is HGBlock:
-                args.insert(4, n)  # number of repeats
+            if m is HGStem:
+                c1, cm, c2 = ch[f], args[0], args[1]
+                args = [c1, cm, c2, *args[2:]]
+            elif m is HGBlock:
+                c1, cm, c2 = ch[f], args[0], args[1]
+                args = [c1, cm, c2, *args[2:]]
+                args.insert(4, n)
                 n = 1
+
+        elif m is DefectAFP_Lite:
+            # 1. 提取原始的来自 [3, 7, 9] 层的特征通道数据
+            raw_c1 = [ch[x] for x in f] if isinstance(f, list) else [ch[f]]
+            
+            # 2. 强力防御性清洗：将可能存在的嵌套 list 展平或提炼为纯正的 int 列表
+            c1 = []
+            for c in raw_c1:
+                if isinstance(c, list):
+                    # 如果这一层包含了多个尺度通道（如 [512, 512, 512]），我们通常取其代表性的一个（比如第一个）
+                    # 或者如果它是形如 [512] 这种被误包装的单元素列表，直接提取 int
+                    c1.append(int(c[0]))
+                else:
+                    c1.append(int(c))
+            
+            # 3. 提炼输出通道数 c2
+            if isinstance(args, list) and len(args) > 0:
+                if isinstance(args[0], list):  # 兼容旧 YAML 的 [[128, 512...], 256] 写法
+                    c2 = args[1] if len(args) > 1 else 256
+                else:
+                    c2 = args[0]
+            else:
+                c2 = 256
+                
+            # 4. 重新打包，锁死传参格式为: [ [512, 1024, 2048], 256 ]
+            args = [c1, int(c2)]
+
         elif m is ResNetLayer:
             c2 = args[1] if args[3] else args[1] * 4
+        
         elif m is torch.nn.BatchNorm2d:
             args = [ch[f]]
+        
         elif m is Concat:
             c2 = sum(ch[x] for x in f)
-        elif m in frozenset(
-            {Detect, WorldDetect, YOLOEDetect, Segment, YOLOESegment, Pose, OBB, ImagePoolingAttn, v10Detect}
-        ):
+        
+        elif m in frozenset({Detect, WorldDetect, YOLOEDetect, Segment, YOLOESegment, Pose, OBB, ImagePoolingAttn, v10Detect}):
             args.append([ch[x] for x in f])
-            if m is Segment or m is YOLOESegment:
-                args[2] = make_divisible(min(args[2], max_channels) * width, 8)
             if m in {Detect, YOLOEDetect, Segment, YOLOESegment, Pose, OBB}:
                 m.legacy = legacy
-        elif m is RTDETRDecoder:  # special case, channels arg must be passed in index 1
-            args.insert(1, [ch[x] for x in f])
-        elif m is CBLinear:
-            c2 = args[0]
-            c1 = ch[f]
-            args = [c1, c2, *args[1:]]
-        elif m is CBFuse:
-            c2 = ch[f[-1]]
+                
+        elif m is RTDETRDecoder:
+            if isinstance(f, int): f = [f]
+            # 核心防御：如果上一层是 DefectAFP_Lite，它的 ch[f[0]] 会是一个包含多层通道的 list
+            if len(f) == 1:
+                prev_ch = ch[f[0]]
+                if isinstance(prev_ch, list): 
+                    input_chs = prev_ch
+                else:
+                    input_chs = [args[1] if len(args) > 1 else 256] * 3
+            else:
+                input_chs = [ch[x] for x in f]
+            args.insert(1, input_chs)
+            
         elif m in frozenset({TorchVision, Index}):
-            c2 = args[0]
-            c1 = ch[f]
-            args = [*args[1:]]
-        else:
-            c2 = ch[f]
+            # 如果 f 被 YAML 包装成了列表（如 [10]），强行解包取其整数编号 10
+            layer_idx = f[0] if isinstance(f, list) else f
+            
+            # 从 ch 字典里捞出上一层的通道结构
+            prev_ch = ch[layer_idx]
+            
+            # 如果上一层是 DefectAFP_Lite 这种返回了 [256, 256, 256] 列表的层
+            if isinstance(prev_ch, list):
+                # args[0] 是你要切片的索引值（如 0, 1, 2）
+                idx = args[0]
+                c1 = prev_ch[idx]  # 精准取出对应尺度的通道数（256）
+            else:
+                c1 = prev_ch
+                
+            c2 = args[0] if m is Index else args[0]  # 对于 Index 模块，它不改变通道维度大小
+            
+            # 重构 Index 实例化参数，Index 模块通常只需要接收切片索引号
+            if m is Index:
+                c2 = c1  # 强制输出通道等于切片后的通道数
+                args = [*args]
+            else:
+                args = [*args[1:]]
 
-        m_ = torch.nn.Sequential(*(m(*args) for _ in range(n))) if n > 1 else m(*args)  # module
-        t = str(m)[8:-2].replace("__main__.", "")  # module type
-        m_.np = sum(x.numel() for x in m_.parameters())  # number params
-        m_.i, m_.f, m_.type = i, f, t  # attach index, 'from' index, type
+        # ----------------------------------------------------
+        # 4. 统一实例化模块
+        # ----------------------------------------------------
+        m_ = torch.nn.Sequential(*(m(*args) for _ in range(n))) if n > 1 else m(*args)
+        
+        t = str(m)[8:-2].replace("__main__.", "")
+        m_.np = sum(x.numel() for x in m_.parameters())
+        m_.i, m_.f, m_.type = i, f, t
         if verbose:
-            LOGGER.info(f"{i:>3}{str(f):>20}{n_:>3}{m_.np:10.0f}  {t:<45}{str(args):<30}")  # print
-        save.extend(x % i for x in ([f] if isinstance(f, int) else f) if x != -1)  # append to savelist
+            LOGGER.info(f"{i:>3}{str(f):>20}{n_:>3}{m_.np:10.0f}  {t:<45}{str(args):<30}")
+        save.extend(x % i for x in ([f] if isinstance(f, int) else f) if x != -1)
+
+        # ----------------------------------------------------
+        # 5. 更新通道列表 ch (终极标准锁)
+        # ----------------------------------------------------
         layers.append(m_)
         if i == 0:
             ch = []
-        ch.append(c2)
-    return torch.nn.Sequential(*layers), sorted(save)
+        
+        # 如果是你的核心模块，直接在通道账本里写入 [256, 256, 256] 列表
+        if m is DefectAFP_Lite:
+            ch.append([c2, c2, c2])  
+        elif hasattr(m_, 'out_channels') and isinstance(m_.out_channels, list):
+            ch.append(m_.out_channels)
+        else:
+            ch.append(c2)
 
+    return torch.nn.Sequential(*layers), sorted(save)
 
 def yaml_model_load(path):
     """

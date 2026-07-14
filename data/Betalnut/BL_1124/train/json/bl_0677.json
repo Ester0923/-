@@ -1,0 +1,214 @@
+{
+  "version": "3.2.6",
+  "flags": {},
+  "shapes": [
+    {
+      "kie_linking": [],
+      "label": "BL",
+      "score": 0.9623576402664185,
+      "points": [
+        [
+          680.33115234375,
+          51.825
+        ],
+        [
+          760.91611328125,
+          51.825
+        ],
+        [
+          760.91611328125,
+          209.7470703125
+        ],
+        [
+          680.33115234375,
+          209.7470703125
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "BL",
+      "score": 0.9393499493598938,
+      "points": [
+        [
+          312.878076171875,
+          103.2349609375
+        ],
+        [
+          431.04482421875,
+          103.2349609375
+        ],
+        [
+          431.04482421875,
+          314.3423828125
+        ],
+        [
+          312.878076171875,
+          314.3423828125
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "Others",
+      "score": 0.9385338425636292,
+      "points": [
+        [
+          415.4111328125,
+          140.223828125
+        ],
+        [
+          483.8837890625,
+          140.223828125
+        ],
+        [
+          483.8837890625,
+          218.620703125
+        ],
+        [
+          415.4111328125,
+          218.620703125
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "BL",
+      "score": 0.9382669925689697,
+      "points": [
+        [
+          576.79443359375,
+          200.4421875
+        ],
+        [
+          712.00439453125,
+          200.4421875
+        ],
+        [
+          712.00439453125,
+          335.6203125
+        ],
+        [
+          576.79443359375,
+          335.6203125
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "Others",
+      "score": 0.9275561571121216,
+      "points": [
+        [
+          23.37364501953125,
+          84.10078125
+        ],
+        [
+          81.20577392578124,
+          84.10078125
+        ],
+        [
+          81.20577392578124,
+          176.619140625
+        ],
+        [
+          23.37364501953125,
+          176.619140625
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "BL",
+      "score": 0.92539381980896,
+      "points": [
+        [
+          615.96328125,
+          33.80947265625
+        ],
+        [
+          697.955859375,
+          33.80947265625
+        ],
+        [
+          697.955859375,
+          218.03662109375
+        ],
+        [
+          615.96328125,
+          218.03662109375
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "BL",
+      "score": 0.9092416167259216,
+      "points": [
+        [
+          968.3869140625,
+          410.8908203125
+        ],
+        [
+          1116.4388671875,
+          410.8908203125
+        ],
+        [
+          1116.4388671875,
+          498.6716796875
+        ],
+        [
+          968.3869140625,
+          498.6716796875
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    }
+  ],
+  "imagePath": "bl_0677.jpg",
+  "imageData": null,
+  "imageHeight": 500,
+  "imageWidth": 2048,
+  "description": ""
+}

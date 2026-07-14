@@ -1,0 +1,127 @@
+{
+  "version": "3.2.6",
+  "flags": {},
+  "shapes": [
+    {
+      "kie_linking": [],
+      "label": "BL",
+      "score": 0.9347931742668152,
+      "points": [
+        [
+          1590.29853515625,
+          313.9240234375
+        ],
+        [
+          1705.1640625,
+          313.9240234375
+        ],
+        [
+          1705.1640625,
+          497.566015625
+        ],
+        [
+          1590.29853515625,
+          497.566015625
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "BL",
+      "score": 0.9276589751243591,
+      "points": [
+        [
+          980.45009765625,
+          2.43740234375
+        ],
+        [
+          1068.76337890625,
+          2.43740234375
+        ],
+        [
+          1068.76337890625,
+          194.59345703125
+        ],
+        [
+          980.45009765625,
+          194.59345703125
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "BL",
+      "score": 0.9191595911979675,
+      "points": [
+        [
+          1503.84638671875,
+          254.320703125
+        ],
+        [
+          1588.71630859375,
+          254.320703125
+        ],
+        [
+          1588.71630859375,
+          486.882421875
+        ],
+        [
+          1503.84638671875,
+          486.882421875
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "BL",
+      "score": 0.9059268236160278,
+      "points": [
+        [
+          866.4591796875,
+          345.926171875
+        ],
+        [
+          944.9294921875,
+          345.926171875
+        ],
+        [
+          944.9294921875,
+          498.80859375
+        ],
+        [
+          866.4591796875,
+          498.80859375
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    }
+  ],
+  "imagePath": "bl_0809.jpg",
+  "imageData": null,
+  "imageHeight": 500,
+  "imageWidth": 2048,
+  "description": ""
+}

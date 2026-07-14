@@ -245,7 +245,31 @@ class v8DetectionLoss:
     def __call__(self, preds: Any, batch: dict[str, torch.Tensor]) -> tuple[torch.Tensor, torch.Tensor]:
         """Calculate the sum of the loss for box, cls and dfl multiplied by batch size."""
         loss = torch.zeros(3, device=self.device)  # box, cls, dfl
-        feats = preds[1] if isinstance(preds, tuple) else preds
+        
+        # =======================
+        # 修改：解析 preds 以获取 residuals
+        # =======================
+        residuals = None
+        feats = None
+        
+        # 这里的逻辑是为了兼容你的 HyperFusionNet 和原生 YOLO
+        if isinstance(preds, tuple):
+            if len(preds) == 2:
+                # 情况1: 原生 YOLO (inference, feats) -> feats是list
+                if isinstance(preds[1], list) and isinstance(preds[1][0], torch.Tensor):
+                    feats = preds[1]
+                # 情况2: 你的 HyperFusionNet (feats, residuals) -> 两者都是list
+                elif isinstance(preds[0], list) and isinstance(preds[1], list):
+                    feats = preds[0]
+                    residuals = preds[1]
+            # 其他情况处理...
+            if feats is None:
+                feats = preds[1] # 默认回退
+        else:
+            feats = preds
+            
+        # -----------------------
+        
         pred_distri, pred_scores = torch.cat([xi.view(feats[0].shape[0], self.no, -1) for xi in feats], 2).split(
             (self.reg_max * 4, self.nc), 1
         )
@@ -266,11 +290,8 @@ class v8DetectionLoss:
 
         # Pboxes
         pred_bboxes = self.bbox_decode(anchor_points, pred_distri)  # xyxy, (b, h*w, 4)
-        # dfl_conf = pred_distri.view(batch_size, -1, 4, self.reg_max).detach().softmax(-1)
-        # dfl_conf = (dfl_conf.amax(-1).mean(-1) + dfl_conf.amax(-1).amin(-1)) / 2
-
+        
         _, target_bboxes, target_scores, fg_mask, _ = self.assigner(
-            # pred_scores.detach().sigmoid() * 0.8 + dfl_conf.unsqueeze(-1) * 0.2,
             pred_scores.detach().sigmoid(),
             (pred_bboxes.detach() * stride_tensor).type(gt_bboxes.dtype),
             anchor_points * stride_tensor,
@@ -282,7 +303,6 @@ class v8DetectionLoss:
         target_scores_sum = max(target_scores.sum(), 1)
 
         # Cls loss
-        # loss[1] = self.varifocal_loss(pred_scores, target_scores, target_labels) / target_scores_sum  # VFL way
         loss[1] = self.bce(pred_scores, target_scores.to(dtype)).sum() / target_scores_sum  # BCE
 
         # Bbox loss
@@ -301,8 +321,17 @@ class v8DetectionLoss:
         loss[1] *= self.hyp.cls  # cls gain
         loss[2] *= self.hyp.dfl  # dfl gain
 
-        return loss * batch_size, loss.detach()  # loss(box, cls, dfl)
-
+        # =======================
+        # 新增：计算重构 Loss 并加入总 Loss
+        # =======================
+        l_recon = torch.tensor(0.0, device=self.device)
+        if residuals is not None:
+            l_recon = self.recon_loss(residuals, batch)
+        
+        # 将重构 Loss 乘以 batch_size 后加到总 loss 里
+        # 注意：这里我们只修改了返回的第一个值 (总loss)，没有修改第二个值 (loss_items)
+        # 这样不会破坏 ultralytics 的日志记录系统，虽然你看不到 l_recon 的曲线，但它在起作用
+        return (loss.sum() + l_recon) * batch_size, loss.detach()
 
 class v8SegmentationLoss(v8DetectionLoss):
     """Criterion class for computing training losses for YOLOv8 segmentation."""

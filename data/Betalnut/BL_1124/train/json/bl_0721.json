@@ -1,0 +1,127 @@
+{
+  "version": "3.2.6",
+  "flags": {},
+  "shapes": [
+    {
+      "kie_linking": [],
+      "label": "BL",
+      "score": 0.9418419599533081,
+      "points": [
+        [
+          1334.98779296875,
+          383.0712890625
+        ],
+        [
+          1441.29365234375,
+          383.0712890625
+        ],
+        [
+          1441.29365234375,
+          497.919921875
+        ],
+        [
+          1334.98779296875,
+          497.919921875
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "BL",
+      "score": 0.9336819648742676,
+      "points": [
+        [
+          1630.08330078125,
+          92.4447265625
+        ],
+        [
+          1711.962890625,
+          92.4447265625
+        ],
+        [
+          1711.962890625,
+          269.0759765625
+        ],
+        [
+          1630.08330078125,
+          269.0759765625
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "Others",
+      "score": 0.9260519742965698,
+      "points": [
+        [
+          1641.478125,
+          296.858203125
+        ],
+        [
+          1715.7828125,
+          296.858203125
+        ],
+        [
+          1715.7828125,
+          368.758203125
+        ],
+        [
+          1641.478125,
+          368.758203125
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    },
+    {
+      "kie_linking": [],
+      "label": "BL",
+      "score": 0.9209048748016357,
+      "points": [
+        [
+          654.43642578125,
+          347.6287109375
+        ],
+        [
+          805.66943359375,
+          347.6287109375
+        ],
+        [
+          805.66943359375,
+          415.6068359375
+        ],
+        [
+          654.43642578125,
+          415.6068359375
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": {},
+      "attributes": {}
+    }
+  ],
+  "imagePath": "bl_0721.jpg",
+  "imageData": null,
+  "imageHeight": 500,
+  "imageWidth": 2048,
+  "description": ""
+}

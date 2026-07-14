@@ -1,0 +1,118 @@
+{
+  "version": "3.3.0",
+  "flags": {},
+  "shapes": [
+    {
+      "label": "BL",
+      "shape_type": "rectangle",
+      "flags": {},
+      "points": [
+        [
+          998.9959680000001,
+          46.00550000000002
+        ],
+        [
+          1097.005056,
+          46.00550000000002
+        ],
+        [
+          1097.005056,
+          272.5995
+        ],
+        [
+          998.9959680000001,
+          272.5995
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "attributes": {}
+    },
+    {
+      "label": "Others",
+      "shape_type": "rectangle",
+      "flags": {},
+      "points": [
+        [
+          167.481344,
+          382.2945
+        ],
+        [
+          239.28012800000002,
+          382.2945
+        ],
+        [
+          239.28012800000002,
+          495.3405
+        ],
+        [
+          167.481344,
+          495.3405
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "attributes": {}
+    },
+    {
+      "label": "BL",
+      "shape_type": "rectangle",
+      "flags": {},
+      "points": [
+        [
+          758.762496,
+          325.65725000000003
+        ],
+        [
+          841.454592,
+          325.65725000000003
+        ],
+        [
+          841.454592,
+          497.72375
+        ],
+        [
+          758.762496,
+          497.72375
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "attributes": {}
+    },
+    {
+      "label": "Others",
+      "shape_type": "rectangle",
+      "flags": {},
+      "points": [
+        [
+          268.896256,
+          281.9625
+        ],
+        [
+          338.950144,
+          281.9625
+        ],
+        [
+          338.950144,
+          342.8025
+        ],
+        [
+          268.896256,
+          342.8025
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "attributes": {}
+    }
+  ],
+  "imagePath": "bl_0286.jpg",
+  "imageData": null,
+  "imageHeight": 500,
+  "imageWidth": 2048
+}

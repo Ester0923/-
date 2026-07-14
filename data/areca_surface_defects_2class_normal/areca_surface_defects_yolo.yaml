@@ -1,0 +1,5 @@
+path: E:/DEIM_260323/research/areca_project/data/detection/areca_surface_defects_2class_normal
+train: train/images
+val: val/images
+test: test/images
+names: {0: 'spot', 1: 'damage'}
