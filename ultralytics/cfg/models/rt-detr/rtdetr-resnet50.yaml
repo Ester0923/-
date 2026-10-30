@@ -19,5 +19,5 @@ backbone:
   - [-1, 1, ResNetLayer, [1024, 512, 2, False, 3]] # 4
 
 head:
-  - [[2, 3, 4], 1, DyReconstructNet, [256]] 
+  - [[2, 3, 4], 1, DyReconstructNet, [256]]
   - [[16, 19, 22], 1, RTDETRDecoder, [nc]] # Detect(P3, P4, P5)
