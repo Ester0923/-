@@ -178,3 +178,31 @@ calibration_*.npy
 datasets/
 runs/
 __pycache__/
+
+# 模型权重与导出文件
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.engine
+*.safetensors
+*.tflite
+
+# 数据集目录
+data/
+datasets/
+
+# 训练输出
+runs/
+wandb/
+
+# Python 缓存与虚拟环境
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# 本地敏感配置
+.env
+.env.*
+!.env.example

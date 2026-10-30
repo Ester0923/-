@@ -1,8 +1,0 @@
-{
-  "images": 903,
-  "exact_cross_split_pairs": 0,
-  "near_duplicate_cross_split_pairs": 9,
-  "phash_distance_threshold": 6,
-  "temporal_cross_split_pairs": 0,
-  "temporal_gap_ms": 2000
-}
