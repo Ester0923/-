@@ -12,24 +12,24 @@ scales: # model compound scaling constants, i.e. 'model=yolov8n-cls.yaml' will c
 
 backbone:
   # [from, repeats, module, args]
-  - [-1, 1, HGStem, [32, 48]]                  # 0-P2/4
-  - [-1, 6, HGBlock, [48, 128, 3]]             # 1-stage 1 (P2, 后面不使用)
-  
+  - [-1, 1, HGStem, [32, 48]] # 0-P2/4
+  - [-1, 6, HGBlock, [48, 128, 3]] # 1-stage 1 (P2, 后面不使用)
+
   # P3/8 尺度
-  - [-1, 1, DWConv, [128, 3, 2, 1]]            # 2-P3/8 下采样 (注意: 原 DWConv 没加 False 的话默认只有4个主要参数)
-  - [-1, 6, HGBlock, [96, 512, 3]]             # 3-stage 2 (P3 输出)
-  
+  - [-1, 1, DWConv, [128, 3, 2, 1]] # 2-P3/8 下采样 (注意: 原 DWConv 没加 False 的话默认只有4个主要参数)
+  - [-1, 6, HGBlock, [96, 512, 3]] # 3-stage 2 (P3 输出)
+
   # P4/16 尺度
-  - [-1, 1, DWConv, [512, 3, 2, 1]]            # 4-P4/16 下采样
+  - [-1, 1, DWConv, [512, 3, 2, 1]] # 4-P4/16 下采样
   - [-1, 6, HGBlock, [192, 1024, 5, True, False]] # 5
-  - [-1, 6, HGBlock, [192, 1024, 5, True, True]]  # 6
-  - [-1, 6, HGBlock, [192, 1024, 5, True, True]]  # 7-stage 3 (P4 输出)
+  - [-1, 6, HGBlock, [192, 1024, 5, True, True]] # 6
+  - [-1, 6, HGBlock, [192, 1024, 5, True, True]] # 7-stage 3 (P4 输出)
 
   # P5/32 尺度
-  - [-1, 1, DWConv, [1024, 3, 2, 1]]           # 8-P5/32 下采样
+  - [-1, 1, DWConv, [1024, 3, 2, 1]] # 8-P5/32 下采样
   - [-1, 6, HGBlock, [384, 2048, 5, True, False]] # 9-stage 4 (P5 输出)
 
 head:
-  - [[3, 7, 9], 1, DefectAFP_Lite, [256]]          # 10 (输出包含 3 个 256 通道张量的列表)
+  - [[3, 7, 9], 1, DefectAFP_Lite, [256]] # 10 (输出包含 3 个 256 通道张量的列表)
 
   - [[10], 1, RTDETRDecoder, [nc, 256, 300, 4, 8, 3]] # 11
