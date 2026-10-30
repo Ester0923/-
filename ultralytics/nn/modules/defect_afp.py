@@ -153,16 +153,21 @@ class FullBiFPN(nn.Module):
             nn.Parameter(torch.ones(2, dtype=torch.float32)) for _ in range(self.num_scales-1)
         ])
 
-        # 融合卷积
+        # 融合卷积 (带 BN 和 激活函数，与图纸完美对应)
         self.top_down_convs = nn.ModuleList([
-            nn.Conv2d(out_ch, out_ch, 3, padding=1) for _ in range(self.num_scales-1)
+            nn.Sequential(
+                nn.Conv2d(out_ch, out_ch, 3, padding=1, bias=False),
+                nn.BatchNorm2d(out_ch),
+                nn.SiLU(inplace=True)
+            ) for _ in range(self.num_scales-1)
         ])
         self.bottom_up_convs = nn.ModuleList([
-            nn.Conv2d(out_ch, out_ch, 3, padding=1) for _ in range(self.num_scales-1)
+            nn.Sequential(
+                nn.Conv2d(out_ch, out_ch, 3, padding=1, bias=False),
+                nn.BatchNorm2d(out_ch),
+                nn.SiLU(inplace=True)
+            )       for _ in range(self.num_scales-1)
         ])
-
-        self.upsample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
-        self.downsample = nn.MaxPool2d(2)
 
     def forward(self, feats):
         # 输入: [P3, P4, P5]
@@ -203,9 +208,12 @@ class DefectAFP(nn.Module):
         # 1. 语义流 Semantic Path: 初始化 FullBiFPN
         self.bifpn = FullBiFPN(in_channels_list, out_channels)
         
-        # 2. 细节流 Detail Path: 初始通道对齐 (解耦提取骨干特征，为了与BiFPN并行)
         self.align_convs = nn.ModuleList([
-            nn.Conv2d(c, out_channels, 1, bias=False) for c in in_channels_list
+            nn.Sequential(
+                nn.Conv2d(c, out_channels, 1, bias=False),
+                nn.BatchNorm2d(out_channels),
+                nn.SiLU(inplace=True)
+            ) for c in in_channels_list
         ])
         
         # 为每个尺度独立实例化细节增强模块（AFEM）与自适应流融合锁（AFM）
