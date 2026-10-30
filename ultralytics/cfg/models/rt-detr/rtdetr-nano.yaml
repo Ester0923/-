@@ -18,7 +18,7 @@ scales: # model compound scaling constants, i.e. 'model=yolov8n-cls.yaml' will c
 custom:
   modules:
     DefectAFP_Lite: ultralytics.nn.modules.defect_afp.DyReconstructNet
-    
+
 # Ultralytics 🚀 AGPL-3.0 License
 # RT-DETR-Slim (HGNetv2 Architecture)
 # 结构完全保留，但通道数大幅削减以适配 NEU-DET
@@ -30,25 +30,25 @@ scales:
 
 backbone:
   # [from, repeats, module, args]
-  # args 格式: [out_channels, mid_channels, ...] 
+  # args 格式: [out_channels, mid_channels, ...]
   # 原版 L: [48, 128] -> Slim版: [24, 32]
   - [-1, 1, HGStem, [32, 32]] # 0-P2/4
-  
+
   # Stage 1
   # 原版 L: [48, 128, 3] -> Slim版: [32, 64, 3]
-  - [-1, 1, HGBlock, [32, 64, 3]] # 1 
-  
+  - [-1, 1, HGBlock, [32, 64, 3]] # 1
+
   # Stage 2 (P3 产出)
   # Downsample: 原版 128 -> Slim 64
   - [-1, 1, DWConv, [64, 3, 2, 1, False]] # 2
   # Block: 原版 [96, 512] -> Slim [48, 128] (关键！P3输出从512降为128)
   - [-1, 2, HGBlock, [48, 128, 3]] # 3-P3/8
-  
+
   # Stage 3 (P4 产出)
   # Downsample: 原版 512 -> Slim 128
   - [-1, 1, DWConv, [128, 3, 2, 1, False]] # 4
   # Block: 原版 [192, 1024] -> Slim [96, 256] (关键！P4输出从1024降为256)
-  - [-1, 2, HGBlock, [96, 256, 5, True, False]] 
+  - [-1, 2, HGBlock, [96, 256, 5, True, False]]
   - [-1, 2, HGBlock, [96, 256, 5, True, True]]
   - [-1, 2, HGBlock, [96, 256, 5, True, True]] # 7-P4/16
 
@@ -65,8 +65,8 @@ head:
   # 输入来自 [3, 7, 9] (对应上面的层索引)
   # 输入通道会自动被解析为 [128, 256, 512]
   # 输出通道设为 256 (RT-DETR Decoder 的标准输入)
-  
-  - [[3, 7, 9], 1, DyReconstructNet, [256]] 
+
+  - [[3, 7, 9], 1, DyReconstructNet, [256]]
 
   # RT-DETR Decoder
   - [[10], 1, RTDETRDecoder, [nc, 256, 300, 4, 8, 3]]
