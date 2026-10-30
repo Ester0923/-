@@ -1,15 +1,19 @@
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
+
 
 # ==========================================
 # 1. 基础轻量化组件 (保留自原文件)
 # ==========================================
 class DWConv(nn.Module):
-    """Depthwise Separable Convolution for Feature Reconstruction"""
+    """Depthwise Separable Convolution for Feature Reconstruction."""
+
     def __init__(self, in_ch, out_ch, kernel_size=3, stride=1, padding=1):
         super().__init__()
-        self.depthwise = nn.Conv2d(in_ch, in_ch, kernel_size=kernel_size, stride=stride, padding=padding, groups=in_ch, bias=False)
+        self.depthwise = nn.Conv2d(
+            in_ch, in_ch, kernel_size=kernel_size, stride=stride, padding=padding, groups=in_ch, bias=False
+        )
         self.pointwise = nn.Conv2d(in_ch, out_ch, kernel_size=1, bias=False)
         self.bn = nn.BatchNorm2d(out_ch)
         self.act = nn.SiLU(inplace=True)
@@ -17,8 +21,10 @@ class DWConv(nn.Module):
     def forward(self, x):
         return self.act(self.bn(self.pointwise(self.depthwise(x))))
 
+
 class SEBlock(nn.Module):
-    """Global Squeeze-and-Excitation operator applied to U_fused"""
+    """Global Squeeze-and-Excitation operator applied to U_fused."""
+
     def __init__(self, channels, reduction=16):
         super().__init__()
         self.gap = nn.AdaptiveAvgPool2d(1)
@@ -26,7 +32,7 @@ class SEBlock(nn.Module):
             nn.Linear(channels, channels // reduction, bias=False),
             nn.SiLU(inplace=True),
             nn.Linear(channels // reduction, channels, bias=False),
-            nn.Sigmoid()
+            nn.Sigmoid(),
         )
 
     def forward(self, x):
@@ -35,15 +41,14 @@ class SEBlock(nn.Module):
         y = self.fc(y).view(b, c, 1, 1)
         return x * y
 
+
 # ==========================================
 # 2. AFEM 四大核心特征抽取分支 (保留自原文件)
 # ==========================================
 class FrequencyBranch(nn.Module):
     def __init__(self, channels):
         super().__init__()
-        kernel = torch.tensor([[-1, -1, -1],
-                               [-1,  8, -1],
-                               [-1, -1, -1]], dtype=torch.float32)
+        kernel = torch.tensor([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]], dtype=torch.float32)
         self.register_buffer("laplacian_kernel", kernel.unsqueeze(0).unsqueeze(0).repeat(channels, 1, 1, 1))
         self.dwconv = nn.Conv2d(channels, channels, kernel_size=3, padding=1, groups=channels, bias=False)
         self.pwconv = nn.Conv2d(channels, channels, kernel_size=1, bias=False)
@@ -56,22 +61,23 @@ class FrequencyBranch(nn.Module):
         out = self.pwconv(out)
         return self.act(self.bn(out))
 
+
 class DirectionBranch(nn.Module):
     def __init__(self, channels):
         super().__init__()
         self.channels = channels
         kernels = [
-            [[0, 0, 0], [-1, 2, -1], [0, 0, 0]],  
-            [[0, -1, 0], [0, 2, 0], [0, -1, 0]],  
-            [[-1, 0, 0], [0, 2, 0], [0, 0, -1]],  
-            [[0, 0, -1], [0, 2, 0], [-1, 0, 0]]   
+            [[0, 0, 0], [-1, 2, -1], [0, 0, 0]],
+            [[0, -1, 0], [0, 2, 0], [0, -1, 0]],
+            [[-1, 0, 0], [0, 2, 0], [0, 0, -1]],
+            [[0, 0, -1], [0, 2, 0], [-1, 0, 0]],
         ]
         self.dwconvs = nn.ModuleList()
         for k in kernels:
             dw = nn.Conv2d(channels, channels, kernel_size=3, padding=1, groups=channels, bias=False)
             dw.weight.data = torch.tensor(k, dtype=torch.float32).unsqueeze(0).unsqueeze(0).repeat(channels, 1, 1, 1)
             self.dwconvs.append(dw)
-        
+
         self.fused_conv = nn.Conv2d(channels * 4, channels, kernel_size=1, bias=False)
         self.bn = nn.BatchNorm2d(channels)
         self.act = nn.SiLU(inplace=True)
@@ -81,6 +87,7 @@ class DirectionBranch(nn.Module):
         out = self.fused_conv(torch.cat(dir_feats, dim=1))
         return self.act(self.bn(out))
 
+
 class AFEM(nn.Module):
     def __init__(self, channels):
         super().__init__()
@@ -88,7 +95,7 @@ class AFEM(nn.Module):
             nn.Conv2d(channels, channels, 3, padding=1, groups=channels, bias=False),
             nn.Conv2d(channels, channels, 1, bias=False),
             nn.BatchNorm2d(channels),
-            nn.SiLU(inplace=True)
+            nn.SiLU(inplace=True),
         )
         self.f_c = nn.Sequential(nn.Conv2d(channels, channels, 1, bias=False), nn.BatchNorm2d(channels))
         self.f_f = FrequencyBranch(channels)
@@ -96,7 +103,7 @@ class AFEM(nn.Module):
 
         self.g_f = nn.Sequential(nn.Conv2d(channels, channels, 1, bias=False), nn.BatchNorm2d(channels))
         self.g_d = nn.Sequential(nn.Conv2d(channels, channels, 1, bias=False), nn.BatchNorm2d(channels))
-        
+
         self.gamma_sf = nn.Parameter(torch.tensor(1.0))
         self.gamma_cd = nn.Parameter(torch.tensor(1.0))
 
@@ -105,7 +112,7 @@ class AFEM(nn.Module):
             DWConv(channels * 6, channels),
             nn.Conv2d(channels, channels, 1, bias=False),
             nn.BatchNorm2d(channels),
-            nn.SiLU(inplace=True)
+            nn.SiLU(inplace=True),
         )
 
     def forward(self, x):
@@ -116,6 +123,7 @@ class AFEM(nn.Module):
         U_refined = self.refine(self.se(U_fused))
         return U_refined + x
 
+
 class AFM(nn.Module):
     def __init__(self, channels, alpha=0.1):
         super().__init__()
@@ -123,7 +131,7 @@ class AFM(nn.Module):
         self.beta = nn.Parameter(torch.tensor(0.5))
 
     def forward(self, A_s, B_s):
-        """A_s: 语义流(BiFPN), B_s: 细节流(AFEM)"""
+        """A_s: 语义流(BiFPN), B_s: 细节流(AFEM)."""
         A_norm = F.normalize(A_s, p=2, dim=1)
         B_norm = F.normalize(B_s, p=2, dim=1)
         beta_s = torch.clamp(self.beta, 0.0, 1.0)
@@ -141,33 +149,33 @@ class FullBiFPN(nn.Module):
         self.epsilon = 1e-4
 
         # 通道对齐
-        self.lateral_convs = nn.ModuleList([
-            nn.Conv2d(in_ch, out_ch, kernel_size=1) for in_ch in in_ch_list
-        ])
+        self.lateral_convs = nn.ModuleList([nn.Conv2d(in_ch, out_ch, kernel_size=1) for in_ch in in_ch_list])
 
         # 每个融合节点使用2个输入，定义可学习权重
-        self.top_down_weights = nn.ParameterList([
-            nn.Parameter(torch.ones(2, dtype=torch.float32)) for _ in range(self.num_scales-1)
-        ])
-        self.bottom_up_weights = nn.ParameterList([
-            nn.Parameter(torch.ones(2, dtype=torch.float32)) for _ in range(self.num_scales-1)
-        ])
+        self.top_down_weights = nn.ParameterList(
+            [nn.Parameter(torch.ones(2, dtype=torch.float32)) for _ in range(self.num_scales - 1)]
+        )
+        self.bottom_up_weights = nn.ParameterList(
+            [nn.Parameter(torch.ones(2, dtype=torch.float32)) for _ in range(self.num_scales - 1)]
+        )
 
         # 融合卷积 (带 BN 和 激活函数，与图纸完美对应)
-        self.top_down_convs = nn.ModuleList([
-            nn.Sequential(
-                nn.Conv2d(out_ch, out_ch, 3, padding=1, bias=False),
-                nn.BatchNorm2d(out_ch),
-                nn.SiLU(inplace=True)
-            ) for _ in range(self.num_scales-1)
-        ])
-        self.bottom_up_convs = nn.ModuleList([
-            nn.Sequential(
-                nn.Conv2d(out_ch, out_ch, 3, padding=1, bias=False),
-                nn.BatchNorm2d(out_ch),
-                nn.SiLU(inplace=True)
-            )       for _ in range(self.num_scales-1)
-        ])
+        self.top_down_convs = nn.ModuleList(
+            [
+                nn.Sequential(
+                    nn.Conv2d(out_ch, out_ch, 3, padding=1, bias=False), nn.BatchNorm2d(out_ch), nn.SiLU(inplace=True)
+                )
+                for _ in range(self.num_scales - 1)
+            ]
+        )
+        self.bottom_up_convs = nn.ModuleList(
+            [
+                nn.Sequential(
+                    nn.Conv2d(out_ch, out_ch, 3, padding=1, bias=False), nn.BatchNorm2d(out_ch), nn.SiLU(inplace=True)
+                )
+                for _ in range(self.num_scales - 1)
+            ]
+        )
 
     def forward(self, feats):
         # 输入: [P3, P4, P5]
@@ -175,7 +183,7 @@ class FullBiFPN(nn.Module):
 
         # 1. 自顶向下融合
         top_down = [laterals[-1]]  # 从 P5 开始
-        for i in range(self.num_scales-2, -1, -1):
+        for i in range(self.num_scales - 2, -1, -1):
             # 仅使用两个输入：上一层特征（上采样）+ 当前层特征
             inputs = [self.upsample(top_down[0]), laterals[i]]
 
@@ -192,9 +200,9 @@ class FullBiFPN(nn.Module):
             inputs = [self.downsample(bottom_up[-1]), top_down[i]]
 
             # 加权融合
-            w = torch.relu(self.bottom_up_weights[i-1])
+            w = torch.relu(self.bottom_up_weights[i - 1])
             weighted_sum = (w[0] * inputs[0] + w[1] * inputs[1]) / (w.sum() + self.epsilon)
-            bottom_up.append(self.bottom_up_convs[i-1](weighted_sum))
+            bottom_up.append(self.bottom_up_convs[i - 1](weighted_sum))
 
         return bottom_up  # 输出[P3_out, P4_out, P5_out]
 
@@ -207,15 +215,16 @@ class DefectAFP(nn.Module):
         super().__init__()
         # 1. 语义流 Semantic Path: 初始化 FullBiFPN
         self.bifpn = FullBiFPN(in_channels_list, out_channels)
-        
-        self.align_convs = nn.ModuleList([
-            nn.Sequential(
-                nn.Conv2d(c, out_channels, 1, bias=False),
-                nn.BatchNorm2d(out_channels),
-                nn.SiLU(inplace=True)
-            ) for c in in_channels_list
-        ])
-        
+
+        self.align_convs = nn.ModuleList(
+            [
+                nn.Sequential(
+                    nn.Conv2d(c, out_channels, 1, bias=False), nn.BatchNorm2d(out_channels), nn.SiLU(inplace=True)
+                )
+                for c in in_channels_list
+            ]
+        )
+
         # 为每个尺度独立实例化细节增强模块（AFEM）与自适应流融合锁（AFM）
         self.afem_paths = nn.ModuleList([AFEM(out_channels) for _ in in_channels_list])
         self.afm_locks = nn.ModuleList([AFM(out_channels) for _ in in_channels_list])
@@ -232,18 +241,19 @@ class DefectAFP(nn.Module):
         out_list = []
         for i, f in enumerate(feats):
             # ========= 步骤2：获取细节流特征 (通道对齐 + AFEM) =========
-            x = self.align_convs[i](f)     
-            B_s = self.afem_paths[i](x)    # B_s: 细节流平行增强特征
-            
+            x = self.align_convs[i](f)
+            B_s = self.afem_paths[i](x)  # B_s: 细节流平行增强特征
+
             # ========= 步骤3：跨流自适应融合 =========
-            A_s = A_s_list[i]              # A_s: 来自 FullBiFPN 的语义特征
-            
+            A_s = A_s_list[i]  # A_s: 来自 FullBiFPN 的语义特征
+
             # 通过 AFM 自适应凸组合融合 A_s (语义) 和 B_s (细节)
             Z_s = self.afm_locks[i](A_s, B_s)
             out_list.append(Z_s)
-            
+
         # 返回最终融合好之后的特征列表，可以直接接YOLO/Faster-RCNN的Head
         return out_list
+
 
 # ==========================================
 # 测试 / 使用示例
@@ -253,14 +263,14 @@ if __name__ == "__main__":
     feats = [
         torch.randn(2, 256, 80, 80),  # P3
         torch.randn(2, 512, 40, 40),  # P4
-        torch.randn(2, 1024, 20, 20)  # P5
+        torch.randn(2, 1024, 20, 20),  # P5
     ]
-    
+
     # 实例化结合后的颈部网络(Neck)
     neck = DefectAFP(in_channels_list=[256, 512, 1024], out_channels=256)
-    
+
     # 前向传播
     outputs = neck(feats)
-    
+
     for i, out in enumerate(outputs):
-        print(f"Output P{i+3} shape: {out.shape}")
+        print(f"Output P{i + 3} shape: {out.shape}")
