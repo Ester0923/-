@@ -10,7 +10,7 @@ imgsz: 800
 save: true
 save_period: -1
 cache: false
-device: '0'
+device: "0"
 workers: 4
 project: null
 name: train48
